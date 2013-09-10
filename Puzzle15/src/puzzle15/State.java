@@ -1,0 +1,26 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package puzzle15;
+
+/**
+ *
+ * @author rodrigo
+ */
+public class State implements Comparable<State>{
+    
+    public int puzzle[][];
+    public Integer key;
+    public boolean open;
+    public Integer father;
+    public int distance;
+
+    @Override
+    public int compareTo(State s) {
+        if (this.distance < s.distance) {
+            return -1;
+        }
+        return 1;
+    }
+}
