@@ -10,11 +10,11 @@ package puzzle15;
  */
 public class State implements Comparable<State>{
     
-    public int puzzle[][];
+    public int puzzle[][] = new int[4][4];
     public Integer key;
     public boolean open;
-    public Integer father;
-    public int distance;
+    public Integer father; //P(n)
+    public int distance; //g(n)
 
     @Override
     public int compareTo(State s) {
