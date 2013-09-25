@@ -6,6 +6,7 @@ package puzzle15;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 
 /**
@@ -24,10 +25,40 @@ public class AStar {
         this.closedStates = new HashMap<Integer, State>();
         this.sucessors = new ArrayList<State>();
         int hLinha;
+        int totalDistance;
+        State v = null;
         
         this.openedStates.add(s);
         hLinha = calculaHLinha(s);
-    }
+        
+        if (openedStates.isEmpty()) {
+            System.out.println("fracasso");
+        } else {
+            v = openedStates.poll();
+            closedStates.put(1, v); //Tem que trocar 1 por um gerador de chaves.
+        }
+        
+        if (v.puzzle == finalState) {
+            System.out.println("Acabou");
+        }
+}
+    
+//    public State achaEstadoMenorTotalDistace(int hLinha) {
+//        int menorTotalDistance = Integer.MAX_VALUE;
+//        int totalDistanceAtual;
+//        State v = null;
+//        Iterator<State> it = openedStates.iterator();
+//        while (it.hasNext()) {
+//                State estadoAtual = it.next();
+//                totalDistanceAtual = hLinha + estadoAtual.distance;
+//                menorTotalDistance = Math.min(totalDistanceAtual, menorTotalDistance);
+//                if (menorTotalDistance == estadoAtual.distance) {
+//                    v = estadoAtual;
+//                }
+//        }
+//        
+//        return v;
+//}
     
     public int calculaHLinha(State m){
         int hLinha1 = calculaHLinha1(m);
