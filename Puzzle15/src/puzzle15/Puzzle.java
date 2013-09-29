@@ -111,6 +111,18 @@ public class Puzzle implements Cloneable {
          this.move(moved,line0, column0 + 1);
     }
 
+    public void searchValue(int value, Integer line, Integer column) {
+        line = 0;
+        column = 0;
+        while (line < this.getHeight()) {
+            while (column < this.getLength() && this.getValue(line, column) != value) {
+                column++;
+            }
+            line++;
+        }
+        line--;
+    }
+    
     public int compareTo(Puzzle other) {
         int out = 0;
         for (int i = 0; i < this.getHeight(); i++) {

@@ -18,9 +18,10 @@ public class AStar {
     private HashMap<String, State> closedStates;
     private ArrayList<State> successors;
     private State startState;
-    private State finalState;
     private State actualState;
     private int times;
+    private State finalState;
+    private String heu;
 
     public AStar(State startState, State finalState) {
         this.startState = startState;
@@ -46,7 +47,7 @@ public class AStar {
     private void init() {
         times = 0;
         startState.father = null;
-        startState.setTotalDistance(0, calculaHLinha(startState));
+        startState.setTotalDistance(0, Heuristics.valueOf(heu).run(startState, finalState));
         this.openedStates.add(startState);
     }
 
@@ -79,7 +80,7 @@ public class AStar {
             m.father = actualState.puzzle;
             m.puzzle = moved;
             //g(m)
-            m.setTotalDistance(actualState.getStartDistance() + 1, calculaHLinha(m));
+            m.setTotalDistance(actualState.getStartDistance() + 1, Heuristics.valueOf(heu).run(m, finalState));
             successors.add(m);
         }
     }
@@ -159,23 +160,5 @@ public class AStar {
         }
 
         return out;
-    }
-
-    public int calculaHLinha(State m) {
-        int hLinha1 = calculaHLinha1(m);
-        int hLinha2 = 0;
-        int hLinha3 = 0;
-        int hLinha;
-
-        hLinha = Math.max(hLinha1, hLinha2);
-        hLinha = Math.max(hLinha, hLinha3);
-
-        return hLinha;
-    }
-
-    public int calculaHLinha1(State m) {
-        int i, j;
-        int hLinha = m.puzzle.compareTo(finalState.puzzle);
-        return hLinha;
     }
 }
