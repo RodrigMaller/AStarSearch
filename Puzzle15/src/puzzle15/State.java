@@ -8,17 +8,36 @@ package puzzle15;
  *
  * @author rodrigo
  */
-public class State implements Comparable<State>{
+public class State implements Comparable<State> {
+
+    public Puzzle puzzle;
+    public Puzzle father; //P(n)
+    private int startDistance; //g(n)
+    private int finalDistance; //h(n)
+    private int totalDistance; //f(n) = g(n) + h(n)
+
     
-    public int puzzle[][] = new int[4][4];
-    public Integer key;
-    public boolean open;
-    public Integer father; //P(n)
-    public int distance; //g(n)
+    public void setTotalDistance(int startDistance, int finalDistance) {
+        this.totalDistance = startDistance + finalDistance;
+    }
+
+    public int getStartDistance() {
+        return startDistance;
+    }
+
+    public int getFinalDistance() {
+        return finalDistance;
+    }
+
+    public int getTotalDistance() {
+        return totalDistance;
+    }
+
+    
 
     @Override
     public int compareTo(State s) {
-        if (this.distance < s.distance) {
+        if (this.totalDistance < s.totalDistance) {
             return -1;
         }
         return 1;

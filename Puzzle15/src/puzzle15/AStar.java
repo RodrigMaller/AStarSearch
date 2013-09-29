@@ -6,7 +6,6 @@ package puzzle15;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 /**
@@ -14,74 +13,169 @@ import java.util.PriorityQueue;
  * @author rodrigo
  */
 public class AStar {
-    
+
     private PriorityQueue<State> openedStates;
-    private HashMap<Integer,State> closedStates;
-    private ArrayList<State> sucessors;
-    private int finalState[][] = {{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,0}};
-    
-    public void executa(State s){
+    private HashMap<String, State> closedStates;
+    private ArrayList<State> successors;
+    private State startState;
+    private State finalState;
+    private State actualState;
+    private int times;
+
+    public AStar(State startState, State finalState) {
+        this.startState = startState;
+        this.finalState = finalState;
         this.openedStates = new PriorityQueue<State>();
-        this.closedStates = new HashMap<Integer, State>();
-        this.sucessors = new ArrayList<State>();
-        int hLinha;
-        int totalDistance;
-        State v = null;
-        
-        this.openedStates.add(s);
-        hLinha = calculaHLinha(s);
-        
-        if (openedStates.isEmpty()) {
-            System.out.println("fracasso");
+        this.closedStates = new HashMap<String, State>();
+    }
+
+    public void perform() throws CloneNotSupportedException {
+        init();
+        int out = 0;
+        while (out == 0) {
+            out = solve();
+        }
+        if (out == 1) {
+            System.out.println("Solved");
         } else {
-            v = openedStates.poll();
-            closedStates.put(1, v); //Tem que trocar 1 por um gerador de chaves.
+            System.out.println("Fail");
         }
-        
-        if (v.puzzle == finalState) {
-            System.out.println("Acabou");
+        System.out.println("times: " + times);
+    }
+
+    private void init() {
+        times = 0;
+        startState.father = null;
+        startState.setTotalDistance(0, calculaHLinha(startState));
+        this.openedStates.add(startState);
+    }
+
+    private boolean isFinalState(State s) {
+        return (s.puzzle.compareTo(finalState.puzzle) == 0);
+    }
+
+    private State getMinState() {
+        ArrayList<State> back = new ArrayList<State>();
+        State min;
+        min = openedStates.poll();
+        while (!openedStates.isEmpty()
+                && (min.getTotalDistance() == openedStates.peek().getTotalDistance())
+                && !isFinalState(min)) {
+            System.out.println("getmin");
+            back.add(min);
+            min = openedStates.poll();
         }
-}
-    
-//    public State achaEstadoMenorTotalDistace(int hLinha) {
-//        int menorTotalDistance = Integer.MAX_VALUE;
-//        int totalDistanceAtual;
-//        State v = null;
-//        Iterator<State> it = openedStates.iterator();
-//        while (it.hasNext()) {
-//                State estadoAtual = it.next();
-//                totalDistanceAtual = hLinha + estadoAtual.distance;
-//                menorTotalDistance = Math.min(totalDistanceAtual, menorTotalDistance);
-//                if (menorTotalDistance == estadoAtual.distance) {
-//                    v = estadoAtual;
-//                }
-//        }
-//        
-//        return v;
-//}
-    
-    public int calculaHLinha(State m){
+        for (State state : back) {
+            openedStates.add(state);
+        }
+        return min;
+    }
+
+    private void addValidSuccessor(Puzzle moved) {
+        if ((actualState != null)
+                && (actualState.puzzle.compareTo(moved) != 0)
+                && (actualState.puzzle.compareTo(moved) != 0)) {
+            State m = new State();
+            m.father = actualState.puzzle;
+            m.puzzle = moved;
+            //g(m)
+            m.setTotalDistance(actualState.getStartDistance() + 1, calculaHLinha(m));
+            successors.add(m);
+        }
+    }
+
+    private void buildSuccessors() throws CloneNotSupportedException {
+        this.successors = new ArrayList<State>();
+
+        Puzzle moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveUp(moved);
+        addValidSuccessor(moved);
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveDown(moved);
+        addValidSuccessor(moved);
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveLeft(moved);
+        addValidSuccessor(moved);
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveRight(moved);
+        addValidSuccessor(moved);
+
+    }
+
+    private void updateStates() {
+        State mi = null;
+        for (State m : successors) {
+            mi = closedStates.remove(m.puzzle.getKey());
+            if (mi != null) {
+                if (m.getStartDistance() < mi.getStartDistance()) {
+                    mi = m;
+                }
+                openedStates.add(mi);
+               
+            } else if (openedStates.contains(m)) {
+
+                ArrayList<State> back = new ArrayList<State>();
+                mi = openedStates.poll();
+                while (!openedStates.isEmpty()
+                        && (!m.puzzle.getKey().equals(mi.puzzle.getKey()))) {
+                    back.add(mi);
+                    mi = openedStates.poll();
+                }
+
+                if ((m.getStartDistance() < mi.getStartDistance())) {
+                    back.add(m);
+                } else {
+                    back.add(mi);
+                }
+
+                for (State state : back) {
+                    openedStates.add(state);
+                }
+
+            } else {
+                openedStates.add(m);
+            }
+
+        }
+
+    }
+
+    private int solve() throws CloneNotSupportedException {
+        times++;
+        int out = -1;
+        if (!openedStates.isEmpty()) {
+            actualState = this.getMinState();
+            closedStates.put(actualState.puzzle.getKey(), actualState);
+            if (isFinalState(actualState)) {
+                out = 1;
+            } else {
+                buildSuccessors();
+                updateStates();
+                out = 0;
+            }
+        }
+
+        return out;
+    }
+
+    public int calculaHLinha(State m) {
         int hLinha1 = calculaHLinha1(m);
         int hLinha2 = 0;
         int hLinha3 = 0;
         int hLinha;
-        
+
         hLinha = Math.max(hLinha1, hLinha2);
         hLinha = Math.max(hLinha, hLinha3);
-        
+
         return hLinha;
     }
-    
-    public int calculaHLinha1(State m){
-        int i,j;
-        int hLinha = 0;
-        for (i=1; i<=this.finalState.length; i++){
-            for (j=0; j<this.finalState[i].length; j++){
-                if (this.finalState[i][j] != m.puzzle[i][j]){
-                    hLinha++;
-                }
-            }
-        }
+
+    public int calculaHLinha1(State m) {
+        int i, j;
+        int hLinha = m.puzzle.compareTo(finalState.puzzle);
         return hLinha;
     }
 }
