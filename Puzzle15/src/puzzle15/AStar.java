@@ -31,17 +31,16 @@ public class AStar {
 
     public void perform() throws CloneNotSupportedException {
         init();
-
-        boolean out = solve();
-
-        if (out) {
+        int out = 0;
+        while (out == 0) {
+            out = solve();
+        }
+        if (out == 1) {
             System.out.println("Solved");
         } else {
             System.out.println("Fail");
         }
-
         System.out.println("times: " + times);
-
     }
 
     private void init() {
@@ -62,6 +61,7 @@ public class AStar {
         while (!openedStates.isEmpty()
                 && (min.getTotalDistance() == openedStates.peek().getTotalDistance())
                 && !isFinalState(min)) {
+            System.out.println("getmin");
             back.add(min);
             min = openedStates.poll();
         }
@@ -72,47 +72,50 @@ public class AStar {
     }
 
     private void addValidSuccessor(Puzzle moved) {
-        if ((actualState.puzzle.compareTo(moved) != 0)
-                && (actualState != null) && (actualState.puzzle.compareTo(moved) != 0)) {
+        if ((actualState != null)
+                && (actualState.puzzle.compareTo(moved) != 0)
+                && (actualState.puzzle.compareTo(moved) != 0)) {
             State m = new State();
             m.father = actualState.puzzle;
             m.puzzle = moved;
             //g(m)
             m.setTotalDistance(actualState.getStartDistance() + 1, calculaHLinha(m));
             successors.add(m);
-            System.out.println("add valid successors");
         }
     }
 
     private void buildSuccessors() throws CloneNotSupportedException {
         this.successors = new ArrayList<State>();
-        Puzzle moved = actualState.puzzle.moveDown();
-        
-        
+
+        Puzzle moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveUp(moved);
         addValidSuccessor(moved);
-        Puzzle moved1 = actualState.puzzle.moveLeft();
-        addValidSuccessor(moved1);
-        Puzzle moved2 = actualState.puzzle.moveRight();
-        addValidSuccessor(moved2);
-        Puzzle moved3 = actualState.puzzle.moveUp();
-        addValidSuccessor(moved3);
-        System.out.println("build successors");
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveDown(moved);
+        addValidSuccessor(moved);
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveLeft(moved);
+        addValidSuccessor(moved);
+
+        moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
+        actualState.puzzle.moveRight(moved);
+        addValidSuccessor(moved);
+
     }
 
     private void updateStates() {
         State mi = null;
         for (State m : successors) {
-
-            //eF
-            mi = closedStates.get(m.puzzle.getKey());
+            mi = closedStates.remove(m.puzzle.getKey());
             if (mi != null) {
-                System.out.println("ef");
                 if (m.getStartDistance() < mi.getStartDistance()) {
                     mi = m;
                 }
                 openedStates.add(mi);
+               
             } else if (openedStates.contains(m)) {
-                System.out.println("contains pq");
 
                 ArrayList<State> back = new ArrayList<State>();
                 mi = openedStates.poll();
@@ -133,7 +136,6 @@ public class AStar {
                 }
 
             } else {
-                System.out.println("else");
                 openedStates.add(m);
             }
 
@@ -141,25 +143,20 @@ public class AStar {
 
     }
 
-    private boolean solve() throws CloneNotSupportedException {
+    private int solve() throws CloneNotSupportedException {
         times++;
-        System.out.println(">>> "+times);
-        boolean out = false;
+        int out = -1;
         if (!openedStates.isEmpty()) {
             actualState = this.getMinState();
             closedStates.put(actualState.puzzle.getKey(), actualState);
             if (isFinalState(actualState)) {
-                out = true;
+                out = 1;
             } else {
                 buildSuccessors();
                 updateStates();
-                return solve();
+                out = 0;
             }
         }
-        /*
-         if (v.puzzle == finalState) {
-         System.out.println("Acabou");
-         }*/
 
         return out;
     }
@@ -173,7 +170,6 @@ public class AStar {
         hLinha = Math.max(hLinha1, hLinha2);
         hLinha = Math.max(hLinha, hLinha3);
 
-        System.out.println(hLinha1);
         return hLinha;
     }
 
