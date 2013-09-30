@@ -4,6 +4,10 @@
  */
 package puzzle15;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 /**
  *
  * @author lucas
@@ -15,6 +19,17 @@ public class Puzzle implements Cloneable {
     public int line0;
     public int column0;
 
+    public Puzzle(String path, int hei, int len) throws FileNotFoundException {
+        this.map = new int[hei][len];
+        this.key = "none";
+        this.loadPuzzle(path);
+    }
+
+    public Puzzle(int hei, int len) {
+        this.map = new int[hei][len];
+        this.key = "none";
+    }
+
     public Puzzle(int[][] x, int l0, int c0) {
         map = x;
         line0 = l0;
@@ -22,18 +37,33 @@ public class Puzzle implements Cloneable {
         this.key = "none";
     }
 
-    public void copyMap(Puzzle p){
+    private void loadPuzzle(String path) throws FileNotFoundException {
+        Scanner puzzleFile = new Scanner(new File(path));
+        Integer value;
+        for (int i = 0; i < this.getHeight(); i++) {
+            for (int j = 0; j < this.getLength(); j++) {
+                if (puzzleFile.hasNextInt()) {
+                    value = puzzleFile.nextInt();
+                    this.setValue(i, j, value);
+                    if(value == 0){
+                        this.line0 = i;
+                        this.column0 = j;
+                    }
+                }
+            }
+
+        }
+        this.printPuzzle();
+
+    }
+
+    public void copyMap(Puzzle p) {
         for (int i = 0; i < this.getHeight(); i++) {
             for (int j = 0; j < this.getLength(); j++) {
                 p.setValue(i, j, this.getValue(i, j));
             }
         }
     }
-    public Puzzle(int l,int c) {
-        map = new int[l][c];
-        this.key = "none";
-    }
-    
 
     public String getKey() {
         if (this.key.equals("none")) {
@@ -67,20 +97,15 @@ public class Puzzle implements Cloneable {
         map[line][column] = value;
     }
 
-    private void move(Puzzle moved,int line, int column) throws CloneNotSupportedException {
-        
+    private void move(Puzzle moved, int line, int column) throws CloneNotSupportedException {
         this.copyMap(moved);
-        
         if ((line >= 0) && (line < this.getHeight())
                 && (column >= 0) && (column < this.getLength())) {
-        
             moved.line0 = line;
             moved.column0 = column;
             int value = this.getValue(line, column);
             moved.setValue(this.line0, this.column0, value);
             moved.setValue(line, column, 0);
-
-            
         }
     }
 
@@ -94,21 +119,20 @@ public class Puzzle implements Cloneable {
         System.out.println("");
     }
 
-    
     public void moveUp(Puzzle moved) throws CloneNotSupportedException {
         this.move(moved, line0 - 1, column0);
     }
-    
+
     public void moveDown(Puzzle moved) throws CloneNotSupportedException {
-         this.move(moved, line0 +1, column0);
+        this.move(moved, line0 + 1, column0);
     }
-   
+
     public void moveLeft(Puzzle moved) throws CloneNotSupportedException {
-         this.move(moved,line0, column0 -1 );
+        this.move(moved, line0, column0 - 1);
     }
 
     public void moveRight(Puzzle moved) throws CloneNotSupportedException {
-         this.move(moved,line0, column0 + 1);
+        this.move(moved, line0, column0 + 1);
     }
 
     public void searchValue(int value, Integer line, Integer column) {
@@ -125,16 +149,18 @@ public class Puzzle implements Cloneable {
     
     public int compareTo(Puzzle other) {
         int out = 0;
-        for (int i = 0; i < this.getHeight(); i++) {
-            for (int j = 0; j < this.getLength(); j++) {
-                if (this.getValue(i, j) != other.getValue(i, j)) {
-                    out++;
-                    //System.out.println("entro");
+        if ((this != null) && (other != null)) {
+            for (int i = 0; i < this.getHeight(); i++) {
+                for (int j = 0; j < this.getLength(); j++) {
+                    if (this.getValue(i, j) != other.getValue(i, j)) {
+                        out++;
+                        //System.out.println("entro");
+                    }
                 }
             }
+        } else {
+            out = -1;
         }
         return out;
     }
-
-    
 }
