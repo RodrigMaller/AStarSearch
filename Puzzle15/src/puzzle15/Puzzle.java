@@ -12,7 +12,7 @@ import java.util.Scanner;
  *
  * @author lucas
  */
-public class Puzzle implements Cloneable {
+public class Puzzle{
 
     private String key;
     private int map[][];
@@ -97,7 +97,7 @@ public class Puzzle implements Cloneable {
         map[line][column] = value;
     }
 
-    private void move(Puzzle moved, int line, int column) throws CloneNotSupportedException {
+    private void move(Puzzle moved, int line, int column){
         this.copyMap(moved);
         if ((line >= 0) && (line < this.getHeight())
                 && (column >= 0) && (column < this.getLength())) {
@@ -119,19 +119,19 @@ public class Puzzle implements Cloneable {
         System.out.println("");
     }
 
-    public void moveUp(Puzzle moved) throws CloneNotSupportedException {
+    public void moveUp(Puzzle moved){
         this.move(moved, line0 - 1, column0);
     }
 
-    public void moveDown(Puzzle moved) throws CloneNotSupportedException {
+    public void moveDown(Puzzle moved){
         this.move(moved, line0 + 1, column0);
     }
 
-    public void moveLeft(Puzzle moved) throws CloneNotSupportedException {
+    public void moveLeft(Puzzle moved){
         this.move(moved, line0, column0 - 1);
     }
 
-    public void moveRight(Puzzle moved) throws CloneNotSupportedException {
+    public void moveRight(Puzzle moved){
         this.move(moved, line0, column0 + 1);
     }
 

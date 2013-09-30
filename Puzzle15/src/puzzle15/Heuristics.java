@@ -9,6 +9,7 @@ package puzzle15;
  * @author rodrigo
  */
 public enum Heuristics {
+
     heu1 {
         @Override
         public int run(State m, State finalState) {
@@ -49,15 +50,16 @@ public enum Heuristics {
 
         for (line = 0; line < m.puzzle.getHeight(); line++) {
             for (column = 0; column < m.puzzle.getLength(); column++) {
-                if (column == (m.puzzle.getLength() - 1)) {
+                if ((column == (m.puzzle.getLength() - 1))
+                        && (line < m.puzzle.getHeight() - 1)) {
                     if (m.puzzle.getValue(line, column) != (m.puzzle.getValue(line + 1, 0) - 1)) {
                         hLine++;
                     }
-                } else {
-                    if (m.puzzle.getValue(line, column) != (m.puzzle.getValue(line, column + 1) - 1)) {
-                        hLine++;
-                    }
+                } else if ((column < m.puzzle.getLength() - 1)
+                        && (m.puzzle.getValue(line, column) != (m.puzzle.getValue(line, column + 1) - 1))) {
+                    hLine++;
                 }
+
             }
         }
         return hLine;
