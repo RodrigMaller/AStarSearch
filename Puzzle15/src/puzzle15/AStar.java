@@ -72,9 +72,13 @@ public class AStar {
     }
 
     private void addValidSuccessor(Puzzle moved) {
+        
+        System.out.println("times: " +times);
         if ((actualState != null)
                 && (actualState.puzzle.compareTo(moved) != 0)
-                && (actualState.puzzle.compareTo(moved) != 0)) {
+                && ((actualState.father == null)
+                || (actualState.father.compareTo(moved) != 0))) {
+            System.out.println("fuck");
             State m = new State();
             m.father = actualState.puzzle;
             m.puzzle = moved;
@@ -86,7 +90,7 @@ public class AStar {
 
     private void buildSuccessors() throws CloneNotSupportedException {
         this.successors = new ArrayList<State>();
-
+        
         Puzzle moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
         actualState.puzzle.moveUp(moved);
         addValidSuccessor(moved);
@@ -108,14 +112,14 @@ public class AStar {
     private void updateStates() {
         State mi = null;
         for (State m : successors) {
-            mi = closedStates.remove(m.puzzle.getKey());
+            mi = closedStates.remove(m.puzzle.getKey());//O(n)
             if (mi != null) {
                 if (m.getStartDistance() < mi.getStartDistance()) {
                     mi = m;
                 }
                 openedStates.add(mi);
-               
-            } else if (openedStates.contains(m)) {
+
+            } else if (openedStates.contains(m)) {//O(n)
 
                 ArrayList<State> back = new ArrayList<State>();
                 mi = openedStates.poll();
