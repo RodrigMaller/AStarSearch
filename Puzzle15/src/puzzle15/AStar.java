@@ -6,6 +6,7 @@ package puzzle15;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 
 /**
@@ -15,12 +16,12 @@ import java.util.PriorityQueue;
 public class AStar {
 
     private PriorityQueue<State> openedStates;
-    private HashMap<String, State> closedStates;
+    private HashMap<String, State> states;
     private ArrayList<State> successors;
     private State startState;
     private State finalState;
     private State actualState;
-    private int times;
+    private int moves, nodes;
     private String heu;
 
     public AStar(String heus, State startState, State finalState) {
@@ -28,10 +29,10 @@ public class AStar {
         this.startState = startState;
         this.finalState = finalState;
         this.openedStates = new PriorityQueue<State>();
-        this.closedStates = new HashMap<String, State>();
+        this.states = new HashMap<String, State>();
     }
 
-    public void perform() throws CloneNotSupportedException {
+    public void perform(){
         init();
         int out = 0;
         while (out == 0) {
@@ -42,14 +43,18 @@ public class AStar {
         } else {
             System.out.println("Fail");
         }
-        System.out.println("times: " + times);
+        System.out.println("Moves: "+moves);
+        System.out.println("Nodes: "+nodes);
     }
 
     private void init() {
-        times = 0;
+        nodes = 0;
+        moves = 0;
         startState.father = null;
         startState.setTotalDistance(0, Heuristics.valueOf(heu).run(startState, finalState));
+        this.startState.opened = true;
         this.openedStates.add(startState);
+        this.states.put(startState.puzzle.getKey(), startState);
     }
 
     private boolean isFinalState(State s) {
@@ -63,7 +68,6 @@ public class AStar {
         while (!openedStates.isEmpty()
                 && (min.getTotalDistance() == openedStates.peek().getTotalDistance())
                 && !isFinalState(min)) {
-            System.out.println("getmin");
             back.add(min);
             min = openedStates.poll();
         }
@@ -74,15 +78,12 @@ public class AStar {
     }
 
     private void addValidSuccessor(Puzzle moved) {
-        
-        System.out.println("times: " +times);
         if ((actualState != null)
                 && (actualState.puzzle.compareTo(moved) != 0)
                 && ((actualState.father == null)
-                || (actualState.father.compareTo(moved) != 0))) {
-            System.out.println("fuck");
+                || (!actualState.father.equals(moved.getKey())))) {
             State m = new State();
-            m.father = actualState.puzzle;
+            m.father = actualState.puzzle.getKey();
             m.puzzle = moved;
             //g(m)
             m.setTotalDistance(actualState.getStartDistance() + 1, Heuristics.valueOf(heu).run(m, finalState));
@@ -90,9 +91,9 @@ public class AStar {
         }
     }
 
-    private void buildSuccessors() throws CloneNotSupportedException {
+    private void buildSuccessors(){
         this.successors = new ArrayList<State>();
-        
+
         Puzzle moved = new Puzzle(actualState.puzzle.getHeight(), actualState.puzzle.getLength());
         actualState.puzzle.moveUp(moved);
         addValidSuccessor(moved);
@@ -112,50 +113,66 @@ public class AStar {
     }
 
     private void updateStates() {
-        State mi = null;
+        State aux;
         for (State m : successors) {
-            mi = closedStates.remove(m.puzzle.getKey());//O(n)
-            if (mi != null) {
-                if (m.getStartDistance() < mi.getStartDistance()) {
-                    mi = m;
-                }
-                openedStates.add(mi);
-
-            } else if (openedStates.contains(m)) {//O(n)
-
-                ArrayList<State> back = new ArrayList<State>();
-                mi = openedStates.poll();
-                while (!openedStates.isEmpty()
-                        && (!m.puzzle.getKey().equals(mi.puzzle.getKey()))) {
-                    back.add(mi);
-                    mi = openedStates.poll();
-                }
-
-                if ((m.getStartDistance() < mi.getStartDistance())) {
-                    back.add(m);
+            aux = states.get(m.puzzle.getKey());
+            if (aux != null) {
+                if (aux.opened) {
+                    if (m.getStartDistance() < aux.getStartDistance()) {
+                        openedStates.remove(aux);
+                        aux.setTotalDistance(m.getStartDistance(), m.getFinalDistance());
+                        aux.father = m.father;
+                        m.opened = true;
+                        openedStates.add(m);
+                    }
                 } else {
-                    back.add(mi);
+                    if (m.getStartDistance() < aux.getStartDistance()) {
+                        aux.setTotalDistance(m.getStartDistance(), m.getFinalDistance());
+                        aux.father = m.father;
+                        aux.opened = true;
+                    }   
+                    openedStates.add(aux);
                 }
-
-                for (State state : back) {
-                    openedStates.add(state);
-                }
-
             } else {
+                m.opened = true;
                 openedStates.add(m);
+                states.put(m.puzzle.getKey(), m);
             }
 
         }
 
     }
 
-    private int solve() throws CloneNotSupportedException {
-        times++;
+  
+
+    private void setClosed(State s) {
+        s.opened = false;
+        State aux = states.get(s.puzzle.getKey());
+        if (aux != null) {
+            aux.opened = false;
+        } else {
+            states.put(s.puzzle.getKey(), s);
+        }
+    }
+
+    private int countMoves(State s){
+        State aux = s;
+        int out = 0;
+        while(aux.father!=null){
+            aux = states.get(aux.father);
+            out++;
+        }
+        return out;
+    }
+    
+    private int solve() {
         int out = -1;
         if (!openedStates.isEmpty()) {
             actualState = this.getMinState();
-            closedStates.put(actualState.puzzle.getKey(), actualState);
+            setClosed(actualState);
             if (isFinalState(actualState)) {
+                moves = countMoves(actualState);
+                nodes = states.size();
                 out = 1;
             } else {
                 buildSuccessors();
