@@ -18,12 +18,13 @@ public class AStar {
     private HashMap<String, State> closedStates;
     private ArrayList<State> successors;
     private State startState;
+    private State finalState;
     private State actualState;
     private int times;
-    private State finalState;
     private String heu;
 
-    public AStar(State startState, State finalState) {
+    public AStar(String heus, State startState, State finalState) {
+        this.heu = heus;
         this.startState = startState;
         this.finalState = finalState;
         this.openedStates = new PriorityQueue<State>();

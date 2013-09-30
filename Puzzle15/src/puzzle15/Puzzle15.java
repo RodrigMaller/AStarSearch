@@ -52,7 +52,7 @@ public class Puzzle15 {
         
         State f = new State();
         f.puzzle = end;
-        AStar alg = new AStar(s1, f);
+        AStar alg = new AStar(heu, s1, f);
         alg.perform();
 
 

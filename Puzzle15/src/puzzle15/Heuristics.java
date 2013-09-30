@@ -9,7 +9,6 @@ package puzzle15;
  * @author rodrigo
  */
 public enum Heuristics {
-
     heu1 {
         @Override
         public int run(State m, State finalState) {
